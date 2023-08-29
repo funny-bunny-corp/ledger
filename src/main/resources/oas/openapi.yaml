@@ -1,0 +1,209 @@
+openapi: 3.0.2
+info:
+  title: Paymentic APIs - Ledger
+  version: 0.0.1
+  description: Double Entry Ledger APIs
+  license:
+    name: MIT License
+    url: 'https://opensource.org/licenses/MIT'
+paths:
+  /books:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestBookCreation'
+        required: true
+      tags:
+        - book
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bookCreated'
+          description: Book created
+        '401':
+          $ref: '#/components/responses/res-401'
+        '403':
+          $ref: '#/components/responses/res-403'
+        '422':
+          $ref: '#/components/responses/res-422'
+        '500':
+          $ref: '#/components/responses/res-500'
+      operationId: create-book
+      summary: It creates a new book
+  '/books/{id}':
+    summary: It retrieves the book
+    get:
+      tags:
+        - book
+      responses:
+        '200':
+          $ref: '#/components/responses/res-200-book'
+        '401':
+          $ref: '#/components/responses/res-401'
+        '403':
+          $ref: '#/components/responses/res-403'
+        '404':
+          $ref: '#/components/responses/res-404'
+        '500':
+          $ref: '#/components/responses/res-500'
+      operationId: get-book
+      summary: It retrieves a book
+    parameters:
+      -
+        name: id
+        description: Book ID
+        schema:
+          type: string
+        in: path
+        required: true
+components:
+  schemas:
+    requestBookCreation:
+      title: Root Type for requestBookCreation
+      description: ''
+      type: object
+      properties:
+        owner:
+          type: object
+          properties:
+            id:
+              type: string
+      example:
+        owner:
+          id: 99eabea1-8dbd-437f-a706-a73162d5ba7b
+    bookCreated:
+      title: Root Type for bookCreated
+      description: ''
+      type: object
+      properties:
+        id:
+          type: string
+      example:
+        id: bfcf3d99-ec2d-4e86-9b1e-1b43c1cc7188
+    error-401:
+      title: error-401
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      example:
+        code: PAY-001
+        description: invalid authentication
+    error-403:
+      title: error-403
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      example:
+        code: PAY-003
+        description: insufficient permissions
+    error-404:
+      title: error-404
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      example:
+        code: PAY-404
+        description: resource not found
+    error-422:
+      title: error-422
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      example:
+        code: PAY-002
+        description: insufficient funds
+    error-500:
+      title: error-500
+      description: ''
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      example:
+        code: PAY-500
+        description: internal server error
+    book:
+      title: Root Type for book
+      description: ''
+      type: object
+      properties:
+        id:
+          type: string
+        owner:
+          type: object
+          properties:
+            id:
+              type: string
+        version:
+          format: int32
+          type: integer
+      example:
+        id: 5f21f211-c2f5-496e-b08b-2e8723b24483
+        owner:
+          id: 99eabea1-8dbd-437f-a706-a73162d5ba7b
+        version: 10
+  responses:
+    res-500:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-500'
+      description: ''
+    res-401:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-401'
+      description: ''
+    res-403:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-403'
+      description: ''
+    res-422:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-422'
+      description: ''
+    res-200-book:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/book'
+      description: ''
+    res-400:
+      content:
+        application/json: {}
+      description: ''
+    res-404:
+      content:
+        application/json: {}
+      description: ''
+tags:
+  -
+    name: book
+    description: Book API

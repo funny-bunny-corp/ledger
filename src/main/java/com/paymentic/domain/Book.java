@@ -25,9 +25,18 @@ public class Book {
   private OwnerId owner;
   @Column(name = "idempotence_key")
   private String idempotenceKey;
-
+  public Integer version;
   public Book(){}
+  Book(UUID id, OwnerId owner, String idempotenceKey, Integer version) {
+    this.id = id;
+    this.owner = owner;
+    this.idempotenceKey = idempotenceKey;
+    this.version = version;
+  }
 
+  public static Book newBook(OwnerId owner){
+    return new Book(UUID.randomUUID(),owner,UUID.randomUUID().toString(),Integer.parseInt("0"));
+  }
   public UUID getId() {
     return id;
   }
@@ -37,5 +46,7 @@ public class Book {
   public String getIdempotenceKey() {
     return idempotenceKey;
   }
-
+  public Integer getVersion() {
+    return version;
+  }
 }
