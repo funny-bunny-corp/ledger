@@ -6,10 +6,12 @@ import java.util.UUID;
 @Embeddable
 public class PaymentOrderId {
   private UUID id;
-
   public PaymentOrderId(){}
   public PaymentOrderId(UUID id) {
     this.id = id;
+  }
+  public PaymentOrderId newPaymentOrderId(UUID id){
+    return new PaymentOrderId(id);
   }
   public UUID getId() {
     return id;

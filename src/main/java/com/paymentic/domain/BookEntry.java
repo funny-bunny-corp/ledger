@@ -18,11 +18,10 @@ import org.hibernate.annotations.GenericGenerator;
 public class BookEntry {
 
   @Id
-  @Column(name = "book_id")
+  @Column(name = "book_entry_id")
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID id;
-
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name="id",column=@Column(name="book_id")),
@@ -38,17 +37,31 @@ public class BookEntry {
   private BigDecimal fromAmount;
   @Column(name = "to_amount")
   private BigDecimal toAmount;
-  @Enumerated(value = EnumType.STRING)
-  @Column(name = "journal_entry_type")
-  private TransactionType journalEntryType;
   @Column(name = "book_version")
   private Long bookVersion;
   @Enumerated(value = EnumType.STRING)
   @Column(name = "operation_type")
-  private TransactionType operationType;
-
+  private OperationType operationType;
   public BookEntry() {
   }
+  public BookEntry(UUID id, BookId book, LocalDateTime at, JournalEntryId journalEntry,
+      BigDecimal fromAmount, BigDecimal toAmount, Long bookVersion, OperationType operationType) {
+    this.id = id;
+    this.book = book;
+    this.at = at;
+    this.journalEntry = journalEntry;
+    this.fromAmount = fromAmount;
+    this.toAmount = toAmount;
+    this.bookVersion = bookVersion;
+    this.operationType = operationType;
+  }
+  public static BookEntry newCredit(){
+    return null;
+  }
+  public static BookEntry newDebit(){
+    return null;
+  }
+
   public UUID getId() {
     return id;
   }
@@ -67,13 +80,10 @@ public class BookEntry {
   public BigDecimal getToAmount() {
     return toAmount;
   }
-  public TransactionType getJournalEntryType() {
-    return journalEntryType;
-  }
   public Long getBookVersion() {
     return bookVersion;
   }
-  public TransactionType getOperationType() {
+  public OperationType getOperationType() {
     return operationType;
   }
 }

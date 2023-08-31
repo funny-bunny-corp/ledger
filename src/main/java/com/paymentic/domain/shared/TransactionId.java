@@ -7,6 +7,12 @@ public class TransactionId {
   private UUID id;
   public TransactionId() {
   }
+  public TransactionId(UUID id) {
+    this.id = id;
+  }
+  public TransactionId newTransactionId(UUID id){
+    return new TransactionId(id);
+  }
   public UUID getId() {
     return id;
   }

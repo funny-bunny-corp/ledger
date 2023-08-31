@@ -10,6 +10,9 @@ public class CheckoutId{
   public CheckoutId(UUID id) {
     this.id = id;
   }
+  public static CheckoutId newCheckoutId(UUID id){
+    return new CheckoutId(id);
+  }
   public UUID getId() {
     return id;
   }

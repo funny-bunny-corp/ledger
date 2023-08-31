@@ -25,6 +25,7 @@ public class Book {
   private OwnerId owner;
   @Column(name = "idempotence_key")
   private String idempotenceKey;
+
   public Integer version;
   public Book(){}
   Book(UUID id, OwnerId owner, String idempotenceKey, Integer version) {

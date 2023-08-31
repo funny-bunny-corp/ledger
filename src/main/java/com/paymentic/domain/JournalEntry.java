@@ -1,6 +1,9 @@
 package com.paymentic.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,7 +19,7 @@ import org.hibernate.type.SqlTypes;
 public class JournalEntry {
 
   @Id
-  @Column(name = "book_id")
+  @Column(name = "journal_entry_id")
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID id;
@@ -25,15 +28,30 @@ public class JournalEntry {
   private TransactionType journalEntryType;
   @Column(name = "idempotence_key")
   private String idempotenceKey;
-
   @Column(name = "registered_at")
   private LocalDateTime registeredAt;
-
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "payment_order")
   private PaymentOrder paymentOrder;
-
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="id",column=@Column(name="book_id")),
+  })
+  private BookId book;
   public JournalEntry() {
+  }
+  public JournalEntry(UUID id, TransactionType journalEntryType, String idempotenceKey,
+      LocalDateTime registeredAt, PaymentOrder paymentOrder,BookId book) {
+    this.id = id;
+    this.journalEntryType = journalEntryType;
+    this.idempotenceKey = idempotenceKey;
+    this.registeredAt = registeredAt;
+    this.paymentOrder = paymentOrder;
+    this.book = book;
+  }
+  public static JournalEntry newJournalEntry(TransactionType journalEntryType, String idempotenceKey,
+       PaymentOrder paymentOrder,BookId book){
+    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder,book);
   }
   public UUID getId() {
     return id;
@@ -50,5 +68,7 @@ public class JournalEntry {
   public PaymentOrder getPaymentOrder() {
     return paymentOrder;
   }
-
+  public BookId getBook() {
+    return book;
+  }
 }
