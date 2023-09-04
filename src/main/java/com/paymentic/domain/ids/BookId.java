@@ -1,4 +1,4 @@
-package com.paymentic.domain;
+package com.paymentic.domain.ids;
 
 import jakarta.persistence.Embeddable;
 

@@ -1,14 +1,14 @@
 package com.paymentic.domain;
 
+import com.paymentic.domain.ids.JournalEntryId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,51 +22,40 @@ public class BookEntry {
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID id;
-  @Embedded
-  @AttributeOverrides({
-      @AttributeOverride(name="id",column=@Column(name="book_id")),
-  })
-  private BookId book;
+  @ManyToOne
+  private Book book;
   private LocalDateTime at;
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name="id",column=@Column(name="journal_entry_id")),
   })
   private JournalEntryId journalEntry;
-  @Column(name = "from_amount")
-  private BigDecimal fromAmount;
-  @Column(name = "to_amount")
-  private BigDecimal toAmount;
-  @Column(name = "book_version")
-  private Long bookVersion;
-  @Enumerated(value = EnumType.STRING)
+  @Column(name = "amount")
+  private BigDecimal amount;
+  private String currency;
   @Column(name = "operation_type")
   private OperationType operationType;
   public BookEntry() {
   }
-  public BookEntry(UUID id, BookId book, LocalDateTime at, JournalEntryId journalEntry,
-      BigDecimal fromAmount, BigDecimal toAmount, Long bookVersion, OperationType operationType) {
+  public BookEntry(UUID id, LocalDateTime at, JournalEntryId journalEntry,
+      BigDecimal amount, String currency, OperationType operationType) {
     this.id = id;
-    this.book = book;
     this.at = at;
     this.journalEntry = journalEntry;
-    this.fromAmount = fromAmount;
-    this.toAmount = toAmount;
-    this.bookVersion = bookVersion;
+    this.amount = amount;
     this.operationType = operationType;
+    this.currency = currency;
   }
-  public static BookEntry newCredit(){
-    return null;
+  public static BookEntry paymentEntry(JournalEntryId journalEntry,
+      BigDecimal amount,String currency){
+    return new BookEntry(UUID.randomUUID(),LocalDateTime.now(),journalEntry,amount,currency,OperationType.CREDIT);
   }
-  public static BookEntry newDebit(){
-    return null;
+  public static BookEntry pendingEntry(JournalEntryId journalEntry,
+      BigDecimal amount,String currency){
+    return new BookEntry(UUID.randomUUID(),LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT);
   }
-
   public UUID getId() {
     return id;
-  }
-  public BookId getBook() {
-    return book;
   }
   public LocalDateTime getAt() {
     return at;
@@ -74,16 +63,16 @@ public class BookEntry {
   public JournalEntryId getJournalEntry() {
     return journalEntry;
   }
-  public BigDecimal getFromAmount() {
-    return fromAmount;
-  }
-  public BigDecimal getToAmount() {
-    return toAmount;
-  }
-  public Long getBookVersion() {
-    return bookVersion;
+  public BigDecimal getAmount() {
+    return amount;
   }
   public OperationType getOperationType() {
     return operationType;
+  }
+  public Book getBook() {
+    return book;
+  }
+  public String getCurrency() {
+    return currency;
   }
 }

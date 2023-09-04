@@ -1,17 +1,25 @@
 package com.paymentic.domain.repositories;
 
 import com.paymentic.domain.Book;
-import com.paymentic.domain.OwnerId;
+import com.paymentic.domain.BookType;
+import com.paymentic.domain.ids.ShelfId;
+import com.paymentic.domain.repositories.data.PaymentBooks;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
 public class BookRepository implements PanacheRepository<Book> {
   public Book findById(UUID id){
-    return null;
+    return find("id", Parameters.with("id", id)).firstResult();
   }
-  public Book findByOwner(OwnerId ownerId){
+  public PaymentBooks findBooksForPayment(ShelfId shelfId){
+    var paymentBook = this.findByShelfIdAndType(shelfId,BookType.PAYMENTS);
+    var pendingBook = this.findByShelfIdAndType(shelfId,BookType.PENDING_BALANCE);
+    return new PaymentBooks(paymentBook,pendingBook);
+  }
+  private Book findByShelfIdAndType(ShelfId shelfId, BookType type){
     return null;
   }
 

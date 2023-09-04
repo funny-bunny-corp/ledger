@@ -1,7 +1,5 @@
 package com.paymentic.domain.events;
 
-
-
 import com.paymentic.domain.shared.BuyerInfo;
 import com.paymentic.domain.shared.CheckoutId;
 import com.paymentic.domain.shared.PaymentOrderId;

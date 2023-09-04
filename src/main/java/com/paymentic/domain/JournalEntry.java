@@ -1,14 +1,12 @@
 package com.paymentic.domain;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
@@ -33,25 +31,21 @@ public class JournalEntry {
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "payment_order")
   private PaymentOrder paymentOrder;
-  @Embedded
-  @AttributeOverrides({
-      @AttributeOverride(name="id",column=@Column(name="book_id")),
-  })
-  private BookId book;
+  @ManyToOne
+  private Shelf shelf;
   public JournalEntry() {
   }
   public JournalEntry(UUID id, TransactionType journalEntryType, String idempotenceKey,
-      LocalDateTime registeredAt, PaymentOrder paymentOrder,BookId book) {
+      LocalDateTime registeredAt, PaymentOrder paymentOrder) {
     this.id = id;
     this.journalEntryType = journalEntryType;
     this.idempotenceKey = idempotenceKey;
     this.registeredAt = registeredAt;
     this.paymentOrder = paymentOrder;
-    this.book = book;
   }
   public static JournalEntry newJournalEntry(TransactionType journalEntryType, String idempotenceKey,
-       PaymentOrder paymentOrder,BookId book){
-    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder,book);
+       PaymentOrder paymentOrder){
+    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder);
   }
   public UUID getId() {
     return id;
@@ -68,7 +62,7 @@ public class JournalEntry {
   public PaymentOrder getPaymentOrder() {
     return paymentOrder;
   }
-  public BookId getBook() {
-    return book;
+  public Shelf getShelf() {
+    return shelf;
   }
 }
