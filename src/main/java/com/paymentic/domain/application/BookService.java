@@ -29,8 +29,8 @@ public class BookService {
   public void recordBookEntries(@Observes JournalEntryRegistered journalEntryRegistered){
     var books = this.bookRepository.findBooksForPayment(journalEntryRegistered.shelfId());
     books.addPayment(BookEntry.paymentEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),
-        journalEntryRegistered.currency()));
-    books.addPending(BookEntry.pendingEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),journalEntryRegistered.currency()));
+        journalEntryRegistered.currency(),books.payment()));
+    books.addPending(BookEntry.pendingEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),journalEntryRegistered.currency(),books.pending()));
     this.bookRepository.persist(books.payment());
     this.bookRepository.persist(books.pending());
     this.trigger.fire(new PaymentBookEntryRegistered(journalEntryRegistered.journalEntryId(),journalEntryRegistered.paymentOrderId()));

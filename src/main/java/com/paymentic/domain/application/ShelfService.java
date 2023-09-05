@@ -41,12 +41,12 @@ public class ShelfService {
   }
   @Transactional
   public void recordJournal(@Observes TransactionRegistered event){
-    var paymentOrder = PaymentOrder.newPaymentOrder(new TransactionId(event.getId()),event.getSellerInfo(),new PaymentOrderId(event.getPaymentOrder().getId()),event.getCheckout(),event.getAmount(),event.getCurrency());
-    var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),paymentOrder);
-    Shelf shelf = this.shelfRepository.byOwner(new OwnerId(event.getSellerInfo().getSellerId()));
+    var paymentOrder = PaymentOrder.newPaymentOrder(event.getTransaction(),event.getSeller(),new PaymentOrderId(event.getPayment().getId()),event.getCheckout(),event.getAmount(),event.getCurrency());
+    Shelf shelf = this.shelfRepository.byOwner(new OwnerId(event.getSeller().getSellerId()));
+    var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),paymentOrder,shelf);
     shelf.addEntry(journal);
     this.shelfRepository.persist(shelf);
-    this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSellerInfo(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment()));
+    this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSeller(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment()));
   }
 
 }

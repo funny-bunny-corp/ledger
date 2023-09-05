@@ -11,10 +11,10 @@ import org.apache.kafka.common.protocol.types.Field.Str;
 @ApplicationScoped
 public class ShelfRepository implements PanacheRepository<Shelf> {
   public Shelf byOwner(OwnerId ownerId){
-    return find("owner.id",Parameters.with("owner.id", UUID.fromString(ownerId.getId()))).firstResult();
+    return find("owner.id = :ownerId",Parameters.with("ownerId", ownerId.getId())).firstResult();
   }
   public Shelf get(String id){
-    return find("id",Parameters.with("id", UUID.fromString(id))).firstResult();
+    return find("id = :id",Parameters.with("id", UUID.fromString(id))).firstResult();
   }
 
 }

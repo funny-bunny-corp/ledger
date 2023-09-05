@@ -4,12 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -18,8 +16,6 @@ public class JournalEntry {
 
   @Id
   @Column(name = "journal_entry_id")
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID id;
   @Enumerated(value = EnumType.STRING)
   @Column(name = "journal_entry_type")
@@ -35,17 +31,18 @@ public class JournalEntry {
   private Shelf shelf;
   public JournalEntry() {
   }
-  public JournalEntry(UUID id, TransactionType journalEntryType, String idempotenceKey,
-      LocalDateTime registeredAt, PaymentOrder paymentOrder) {
+  public JournalEntry(UUID id,TransactionType journalEntryType, String idempotenceKey,
+      LocalDateTime registeredAt, PaymentOrder paymentOrder,Shelf shelf) {
     this.id = id;
     this.journalEntryType = journalEntryType;
     this.idempotenceKey = idempotenceKey;
     this.registeredAt = registeredAt;
     this.paymentOrder = paymentOrder;
+    this.shelf = shelf;
   }
   public static JournalEntry newJournalEntry(TransactionType journalEntryType, String idempotenceKey,
-       PaymentOrder paymentOrder){
-    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder);
+       PaymentOrder paymentOrder,Shelf shelf){
+    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder,shelf);
   }
   public UUID getId() {
     return id;

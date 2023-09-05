@@ -3,6 +3,7 @@ package com.paymentic.domain;
 import com.paymentic.domain.ids.ShelfId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -35,7 +36,7 @@ public class Book {
 
   @Version
   public Integer version;
-  @OneToMany(mappedBy = "book")
+  @OneToMany(mappedBy = "book",cascade = CascadeType.ALL)
   private Set<BookEntry> entries;
   public Book(){}
   public Book(String idempotenceKey, ShelfId shelf, BookType type) {

@@ -20,7 +20,7 @@ public class BookRepository implements PanacheRepository<Book> {
     return new PaymentBooks(paymentBook,pendingBook);
   }
   private Book findByShelfIdAndType(ShelfId shelfId, BookType type){
-    return null;
+    return find("shelf.id = :shelfId and type = :type",Parameters.with("shelfId", shelfId.getId()).and("type",type)).firstResult();
   }
 
 }

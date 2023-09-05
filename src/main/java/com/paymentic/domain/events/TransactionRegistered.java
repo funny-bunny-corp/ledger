@@ -4,33 +4,31 @@ import com.paymentic.domain.shared.BuyerInfo;
 import com.paymentic.domain.shared.CheckoutId;
 import com.paymentic.domain.shared.PaymentOrderId;
 import com.paymentic.domain.shared.SellerInfo;
+import com.paymentic.domain.shared.TransactionId;
 import java.util.UUID;
 
 public class TransactionRegistered {
-  private UUID id;
+  private TransactionId transaction;
   private String amount;
   private String currency;
   private CheckoutId checkout;
   private BuyerInfo buyer;
-  private PaymentOrderId paymentOrder;
-  private SellerInfo sellerInfo;
+  private PaymentOrderId payment;
+  private SellerInfo seller;
   public TransactionRegistered(){}
-  public TransactionRegistered(UUID id, String amount, String currency, CheckoutId checkout, BuyerInfo buyer,
+  public TransactionRegistered(TransactionId id, String amount, String currency, CheckoutId checkout, BuyerInfo buyer,
       PaymentOrderId paymentOrder,SellerInfo sellerInfo) {
-    this.id = id;
+    this.transaction = id;
     this.amount = amount;
     this.currency = currency;
     this.checkout = checkout;
     this.buyer = buyer;
-    this.paymentOrder = paymentOrder;
-    this.sellerInfo = sellerInfo;
+    this.payment = paymentOrder;
+    this.seller = sellerInfo;
   }
-  public static TransactionRegistered newTransactionRegistered(UUID id, String amount, String currency, CheckoutId checkout, BuyerInfo buyer,
+  public static TransactionRegistered newTransactionRegistered(TransactionId id, String amount, String currency, CheckoutId checkout, BuyerInfo buyer,
       PaymentOrderId paymentOrder,SellerInfo sellerInfo){
     return new TransactionRegistered(id,amount,currency,checkout,buyer,paymentOrder,sellerInfo);
-  }
-  public UUID getId() {
-    return id;
   }
   public String getAmount() {
     return amount;
@@ -44,10 +42,13 @@ public class TransactionRegistered {
   public BuyerInfo getBuyer() {
     return buyer;
   }
-  public PaymentOrderId getPaymentOrder() {
-    return paymentOrder;
+  public PaymentOrderId getPayment() {
+    return payment;
   }
-  public SellerInfo getSellerInfo() {
-    return sellerInfo;
+  public SellerInfo getSeller() {
+    return seller;
+  }
+  public TransactionId getTransaction() {
+    return transaction;
   }
 }

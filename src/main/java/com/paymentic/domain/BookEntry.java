@@ -6,6 +6,8 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -34,25 +36,26 @@ public class BookEntry {
   private BigDecimal amount;
   private String currency;
   @Column(name = "operation_type")
+  @Enumerated(value = EnumType.STRING)
   private OperationType operationType;
   public BookEntry() {
   }
-  public BookEntry(UUID id, LocalDateTime at, JournalEntryId journalEntry,
-      BigDecimal amount, String currency, OperationType operationType) {
-    this.id = id;
+  public BookEntry(LocalDateTime at, JournalEntryId journalEntry,
+      BigDecimal amount, String currency, OperationType operationType,Book book) {
     this.at = at;
     this.journalEntry = journalEntry;
     this.amount = amount;
     this.operationType = operationType;
     this.currency = currency;
+    this.book = book;
   }
   public static BookEntry paymentEntry(JournalEntryId journalEntry,
-      BigDecimal amount,String currency){
-    return new BookEntry(UUID.randomUUID(),LocalDateTime.now(),journalEntry,amount,currency,OperationType.CREDIT);
+      BigDecimal amount,String currency,Book book){
+    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.CREDIT,book);
   }
   public static BookEntry pendingEntry(JournalEntryId journalEntry,
-      BigDecimal amount,String currency){
-    return new BookEntry(UUID.randomUUID(),LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT);
+      BigDecimal amount,String currency,Book book){
+    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT,book);
   }
   public UUID getId() {
     return id;
