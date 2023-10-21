@@ -3,6 +3,7 @@ package com.paymentic.domain;
 import com.paymentic.domain.ids.OwnerId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -27,7 +28,7 @@ public class Shelf {
       @AttributeOverride(name="id",column=@Column(name="owner_id")),
   })
   private OwnerId owner;
-  @OneToMany(mappedBy = "shelf")
+  @OneToMany(mappedBy = "shelf",cascade = CascadeType.ALL)
   private Set<JournalEntry> journals;
   public Shelf() {
   }

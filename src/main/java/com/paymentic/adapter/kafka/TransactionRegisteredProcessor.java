@@ -30,12 +30,12 @@ public class TransactionRegisteredProcessor {
     var event = message.getMetadata(IncomingCloudEventMetadata.class).orElseThrow(() -> new IllegalArgumentException("Expected a Cloud Event"));
     var handle = eventRepository.shouldHandle(new com.paymentic.infra.events.Event(UUID.fromString(event.getId())));
     if (handle){
-      LOGGER.info("Receiving transaction registered event. Start processing....");
       if (TRANSACTION_REGISTERED_EVENT_TYPE.equals(event.getType())){
+        LOGGER.info("Receiving transaction registered event. Start processing....");
         var transaction = message.getPayload();
         this.trigger.fire(transaction);
+        LOGGER.info("Transaction registered event processed!");
       }
-      LOGGER.info("Transaction registered event processed!");
     }else {
       LOGGER.error(String.format(ERROR, event.getId()));
     }
