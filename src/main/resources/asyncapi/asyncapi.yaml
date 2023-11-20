@@ -1,63 +1,72 @@
 asyncapi: 2.6.0
-id: 'urn:com.paymentic.transaction'
+id: 'urn:com.paymentic.ledger'
 info:
-  title: Paymentic Ledger APIs CloudEvents API structured
+  title: Paymentic Ledger APIs
   version: 0.0.1
 defaultContentType: application/cloudevents+json; charset=UTF-8
 channels:
 
-  paymentsOrderApproved:
+  transactionWalletRegistered:
+    bindings:
+      kafka:
+        topic: 'payments'
+        partitions: 3
+        replicas: 3
+        bindingVersion: '0.4.0'
     description: The topic on which payments may be consumed.
     publish:
       summary: >-
-        Inform about payment order approved
-      operationId: paymentsOrderApprovedStream
+        Inform about transaction registered in wallet
+      operationId: receiveTransactionWalletRegistered
       message:
-        $ref: '#/components/messages/cePaymentOrderApprovedEvent'
+        $ref: '#/components/messages/ceTransactionWalletRegisteredEvent'
 
-  transactionWalletRegistered:
+  transactionBookedEvent:
+    bindings:
+      kafka:
+        topic: 'payments'
+        partitions: 3
+        replicas: 3
+        bindingVersion: '0.4.0'
     description: The topic on which payments may be consumed.
     subscribe:
       summary: >-
         Inform about transaction registered in wallet
-      operationId: transactionWalletRegisteredStream
+      operationId: publishTransactionBooked
       message:
-        $ref: '#/components/messages/ceTransactionWalletRegisteredEvent'
-
+        $ref: '#/components/messages/ceTransactionBookedEvent'
 
 components:
 
   messages:
 
-    cePaymentOrderApprovedEvent:
-      name: paymentOrderApprovedEvent
-      title: Payment Orders Approved
-      summary: >-
-        Inform about environmental lighting conditions of a particular
-        streetlight.
-      contentType: application/cloudevents+json; charset=UTF-8
-      payload:
-        $ref: '#/components/schemas/paymentOrderApprovedEvent'
-
     ceTransactionWalletRegisteredEvent:
       name: transactionWalletRegisteredEvent
       title: Transaction registered in wallet
       summary: >-
-        Inform about environmental lighting conditions of a particular
-        streetlight.
+        a payment event typically involves receiving a payment, confirming its processing, and then updating the payment amount in the user's digital wallet. This sequence ensures secure and reliable financial transactions within digital platforms.
       contentType: application/cloudevents+json; charset=UTF-8
       payload:
         $ref: '#/components/schemas/transactionWalletRegisteredEvent'
 
+    ceTransactionBookedEvent:
+      name: transactionBookedEvent
+      title: Transaction Booked in records
+      summary: >-
+        a payment event typically involves receiving a payment, confirming its processing, and then updating the payment amount in the user's digital wallet. This sequence ensures secure and reliable financial transactions within digital platforms.
+      contentType: application/cloudevents+json; charset=UTF-8
+      payload:
+        $ref: '#/components/schemas/transactionBookedEvent'
+
   schemas:
 
-    paymentCreatedEvent:
+    transactionBookedEvent:
       type: object
       allOf:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-created.json'
+          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/transactions/payments-gateway.v1.transaction-booked.json'
 
     transactionWalletRegisteredEvent:
       type: object
@@ -65,13 +74,6 @@ components:
         - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
       properties:
         data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/transactions/payments-gateway.v1.transaction-wallet-registered.json'
+          $ref: >-
+            https://raw.githubusercontent.com/paymentic/schemas/main/transactions/payments-gateway.v1.transaction-wallet-registered.json
 
-
-    paymentOrderApprovedEvent:
-      type: object
-      allOf:
-        - $ref: 'https://raw.githubusercontent.com/cloudevents/spec/v1.0.1/spec.json'
-      properties:
-        data:
-          $ref: 'https://raw.githubusercontent.com/paymentic/schemas/main/payments/payments-gateway.v1.payment-order-approved.json'
