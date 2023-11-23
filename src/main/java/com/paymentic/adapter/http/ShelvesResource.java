@@ -1,13 +1,14 @@
 package com.paymentic.adapter.http;
 
+import com.paymentic.adapter.http.apis.api.ShelvesApi;
+import com.paymentic.adapter.http.apis.model.RequestShelfCreation;
+import com.paymentic.adapter.http.apis.model.Shelf;
+import com.paymentic.adapter.http.apis.model.ShelfCreated;
 import com.paymentic.domain.application.ShelfService;
 import com.paymentic.domain.ids.OwnerId;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
-import org.openapitools.api.ShelvesApi;
-import org.openapitools.model.RequestShelfCreation;
-import org.openapitools.model.Shelf;
-import org.openapitools.model.ShelfCreated;
+
 
 @ApplicationScoped
 public class ShelvesResource implements ShelvesApi {
