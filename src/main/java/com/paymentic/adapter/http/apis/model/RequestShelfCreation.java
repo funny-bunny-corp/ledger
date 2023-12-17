@@ -10,7 +10,7 @@ import java.util.Objects;
  **/
 
 @JsonTypeName("requestShelfCreation")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2023-11-23T08:33:25.220758-03:00[America/Sao_Paulo]")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2023-12-09T10:59:29.842184-03:00[America/Sao_Paulo]")
 public class RequestShelfCreation   {
   private @Valid ShelfOwner owner;
 

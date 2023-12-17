@@ -1,24 +1,27 @@
 package com.paymentic.adapter.http.apis.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
+
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-/**
- *
- **/
 
-@JsonTypeName("shelf")
+
+@JsonTypeName("books_inner")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2023-12-09T10:59:29.842184-03:00[America/Sao_Paulo]")
-public class Shelf   {
+public class BooksInner   {
   private @Valid String id;
-  private @Valid ShelfOwner owner;
+  private @Valid String type;
   private @Valid Integer version;
 
   /**
    **/
-  public Shelf id(String id) {
+  public BooksInner id(String id) {
     this.id = id;
     return this;
   }
@@ -36,25 +39,25 @@ public class Shelf   {
 
   /**
    **/
-  public Shelf owner(ShelfOwner owner) {
-    this.owner = owner;
+  public BooksInner type(String type) {
+    this.type = type;
     return this;
   }
 
 
-  @JsonProperty("owner")
-  public ShelfOwner getOwner() {
-    return owner;
+  @JsonProperty("type")
+  public String getType() {
+    return type;
   }
 
-  @JsonProperty("owner")
-  public void setOwner(ShelfOwner owner) {
-    this.owner = owner;
+  @JsonProperty("type")
+  public void setType(String type) {
+    this.type = type;
   }
 
   /**
    **/
-  public Shelf version(Integer version) {
+  public BooksInner version(Integer version) {
     this.version = version;
     return this;
   }
@@ -79,24 +82,24 @@ public class Shelf   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Shelf shelf = (Shelf) o;
-    return Objects.equals(this.id, shelf.id) &&
-        Objects.equals(this.owner, shelf.owner) &&
-        Objects.equals(this.version, shelf.version);
+    BooksInner booksInner = (BooksInner) o;
+    return Objects.equals(this.id, booksInner.id) &&
+        Objects.equals(this.type, booksInner.type) &&
+        Objects.equals(this.version, booksInner.version);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, owner, version);
+    return Objects.hash(id, type, version);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Shelf {\n");
+    sb.append("class BooksInner {\n");
 
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("}");
     return sb.toString();

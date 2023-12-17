@@ -50,7 +50,7 @@ paths:
           $ref: '#/components/responses/res-404'
         '500':
           $ref: '#/components/responses/res-500'
-      operationId: get-book
+      operationId: get-shelf
       summary: It retrieves a book
     parameters:
       -
@@ -60,6 +60,54 @@ paths:
           type: string
         in: path
         required: true
+  '/shelves/{id}/books':
+    get:
+      tags:
+        - book
+      parameters:
+        -
+          name: id
+          schema:
+            type: string
+          in: path
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/res-200-books'
+        '401':
+          $ref: '#/components/responses/res-401'
+        '403':
+          $ref: '#/components/responses/res-403'
+        '500':
+          $ref: '#/components/responses/res-500'
+      operationId: get-books
+  '/shelves/{id}/books/{bookId}/records':
+    get:
+      tags:
+        - book
+      parameters:
+        -
+          name: id
+          schema:
+            type: string
+          in: path
+          required: true
+        -
+          name: bookId
+          schema:
+            type: string
+          in: path
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/res-200-records'
+        '401':
+          $ref: '#/components/responses/res-401'
+        '403':
+          $ref: '#/components/responses/res-403'
+        '500':
+          $ref: '#/components/responses/res-500'
+      operationId: get-records
 components:
   schemas:
     error-401:
@@ -164,6 +212,100 @@ components:
       example:
         owner:
           id: 99eabea1-8dbd-437f-a706-a73162d5ba7b
+    book:
+      title: Root Type for book
+      description: ''
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        version:
+          format: int32
+          type: integer
+      example:
+        id: f4b4f28f-56c4-4427-b772-0ef38f5653f8
+        type: payments
+        version: 10
+    books:
+      title: Root Type for books
+      description: ''
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          version:
+            format: int32
+            type: integer
+      example:
+        -
+          id: f4b4f28f-56c4-4427-b772-0ef38f5653f8
+          type: payments
+          version: 10
+        -
+          id: f3b4f28f-56c4-4427-b772-0ef38f5653f8
+          type: pending
+          version: 10
+    record:
+      title: Root Type for record
+      description: ''
+      type: object
+      properties:
+        id:
+          type: string
+        at:
+          format: date
+          type: string
+        amount:
+          format: double
+          type: number
+        currency:
+          type: string
+        type:
+          type: string
+      example:
+        id: 944fd016-d9fc-4ff6-b69b-a80878a7a0d7
+        at: '2023-02-21'
+        amount: 112.21
+        currency: BRL
+        type: CREDIT
+    records:
+      title: Root Type for records
+      description: ''
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          at:
+            format: date
+            type: string
+          amount:
+            format: double
+            type: number
+          currency:
+            type: string
+          type:
+            type: string
+      example:
+        -
+          id: 944fd016-d9fc-4ff6-b69b-a80878a7a0d7
+          at: '2023-02-21'
+          amount: 112.21
+          currency: BRL
+          type: CREDIT
+        -
+          id: 944fd016-d9fc-4ff6-b69b-a80878a7a0d7
+          at: '2023-02-21'
+          amount: 112.21
+          currency: BRL
+          type: DEBIT
   responses:
     res-500:
       content:
@@ -203,7 +345,22 @@ components:
           schema:
             $ref: '#/components/schemas/shelf'
       description: ''
+    res-200-books:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/books'
+      description: ''
+    res-200-records:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/records'
+      description: ''
 tags:
   -
     name: shelf
     description: Shelf API
+  -
+    name: book
+    description: Book API

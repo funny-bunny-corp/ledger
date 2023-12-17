@@ -1,20 +1,30 @@
 package com.paymentic.adapter.http;
 
 import com.paymentic.adapter.http.apis.api.ShelvesApi;
+import com.paymentic.adapter.http.apis.model.BooksInner;
+import com.paymentic.adapter.http.apis.model.RecordsInner;
 import com.paymentic.adapter.http.apis.model.RequestShelfCreation;
 import com.paymentic.adapter.http.apis.model.Shelf;
 import com.paymentic.adapter.http.apis.model.ShelfCreated;
+import com.paymentic.domain.application.BookService;
 import com.paymentic.domain.application.ShelfService;
 import com.paymentic.domain.ids.OwnerId;
+import com.paymentic.domain.ids.ShelfId;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 
 @ApplicationScoped
+@RunOnVirtualThread
 public class ShelvesResource implements ShelvesApi {
   private final ShelfService shelfService;
-  public ShelvesResource(ShelfService shelfService) {
+  private final BookService bookService;
+
+  public ShelvesResource(ShelfService shelfService, BookService bookService) {
     this.shelfService = shelfService;
+    this.bookService = bookService;
   }
   @Override
   public ShelfCreated createShelf(RequestShelfCreation requestShelfCreation) {
@@ -22,8 +32,21 @@ public class ShelvesResource implements ShelvesApi {
     this.shelfService.register(shelf);
     return new ShelfCreated().id(shelf.getId().toString());
   }
+
   @Override
-  public Shelf getBook(String id) {
+  public List<BooksInner> getBooks(String id) {
+    return this.bookService.byShelf(new ShelfId(UUID.fromString(id))).stream()
+        .map(bk -> new BooksInner().id(bk.getId().toString()).type(bk.getType().toString()).version(bk.getVersion())).collect(
+        Collectors.toList());
+  }
+
+  @Override
+  public List<RecordsInner> getRecords(String id, String bookId) {
+    return null;
+  }
+
+  @Override
+  public Shelf getShelf(String id) {
     var data = this.shelfService.get(id);
     return new Shelf().id(data.getId().toString());
   }

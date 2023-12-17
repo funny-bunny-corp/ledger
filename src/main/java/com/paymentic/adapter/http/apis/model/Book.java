@@ -14,46 +14,65 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  *
  **/
 
-@JsonTypeName("error-404")
+@JsonTypeName("book")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2023-12-09T10:59:29.842184-03:00[America/Sao_Paulo]")
-public class Error404   {
-  private @Valid String code;
-  private @Valid String description;
+public class Book   {
+  private @Valid String id;
+  private @Valid String type;
+  private @Valid Integer version;
 
   /**
    **/
-  public Error404 code(String code) {
-    this.code = code;
+  public Book id(String id) {
+    this.id = id;
     return this;
   }
 
 
-  @JsonProperty("code")
-  public String getCode() {
-    return code;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
 
-  @JsonProperty("code")
-  public void setCode(String code) {
-    this.code = code;
+  @JsonProperty("id")
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**
    **/
-  public Error404 description(String description) {
-    this.description = description;
+  public Book type(String type) {
+    this.type = type;
     return this;
   }
 
 
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
+  @JsonProperty("type")
+  public String getType() {
+    return type;
   }
 
-  @JsonProperty("description")
-  public void setDescription(String description) {
-    this.description = description;
+  @JsonProperty("type")
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
+   **/
+  public Book version(Integer version) {
+    this.version = version;
+    return this;
+  }
+
+
+  @JsonProperty("version")
+  public Integer getVersion() {
+    return version;
+  }
+
+  @JsonProperty("version")
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 
 
@@ -65,23 +84,25 @@ public class Error404   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Error404 error404 = (Error404) o;
-    return Objects.equals(this.code, error404.code) &&
-        Objects.equals(this.description, error404.description);
+    Book book = (Book) o;
+    return Objects.equals(this.id, book.id) &&
+        Objects.equals(this.type, book.type) &&
+        Objects.equals(this.version, book.version);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, description);
+    return Objects.hash(id, type, version);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Error404 {\n");
+    sb.append("class Book {\n");
 
-    sb.append("    code: ").append(toIndentedString(code)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("}");
     return sb.toString();
   }

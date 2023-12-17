@@ -12,6 +12,7 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -24,6 +25,9 @@ public class BookService {
   }
   public Book get(UUID id){
     return this.bookRepository.findById(id);
+  }
+  public List<Book> byShelf(ShelfId shelfId){
+    return this.bookRepository.booksByShelf(shelfId);
   }
   @Transactional
   public void recordBookEntries(@Observes JournalEntryRegistered journalEntryRegistered){
