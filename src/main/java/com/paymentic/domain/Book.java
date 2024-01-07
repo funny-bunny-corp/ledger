@@ -33,16 +33,22 @@ public class Book {
   private ShelfId shelf;
   @Enumerated(value = EnumType.STRING)
   private BookType type;
-
   @Version
   public Integer version;
   @OneToMany(mappedBy = "book",cascade = CascadeType.ALL)
   private Set<BookEntry> entries;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="fromAmount",column=@Column(name="from_amount")),
+      @AttributeOverride(name="toAmount",column=@Column(name="to_amount")),
+  })
+  private AmountSnapshot snapshot;
   public Book(){}
   public Book(String idempotenceKey, ShelfId shelf, BookType type) {
     this.idempotenceKey = idempotenceKey;
     this.shelf = shelf;
     this.type = type;
+    this.snapshot = AmountSnapshot.zero();
   }
   public static Book newPaymentBook(String idempotenceKey, ShelfId shelf){
     return new Book(idempotenceKey,shelf,BookType.PAYMENTS);
@@ -56,8 +62,14 @@ public class Book {
   public static Book newPayoutBook(String idempotenceKey, ShelfId shelf){
     return new Book(idempotenceKey,shelf,BookType.PAYOUT);
   }
-  public boolean addEntry(BookEntry entry){
-    return this.entries.add(entry);
+  public boolean addEntry(BookEntry entry,VersionNumber version){
+    this.version = version.version();
+    if (OperationType.CREDIT.equals(entry.getOperationType())){
+      this.snapshot = new AmountSnapshot(this.snapshot.getToAmount(),this.snapshot.getToAmount().add(entry.getAmount()));
+    }else{
+      this.snapshot = new AmountSnapshot(this.snapshot.getToAmount(),this.snapshot.getToAmount().subtract(entry.getAmount()));
+    }
+    return this.entries.add(entry.holdBalance(this.snapshot));
   }
   public UUID getId() {
     return id;
@@ -76,6 +88,9 @@ public class Book {
   }
   public Set<BookEntry> getEntries() {
     return entries;
+  }
+  public AmountSnapshot getSnapshot() {
+    return snapshot;
   }
 
 }

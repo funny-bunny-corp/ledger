@@ -2,6 +2,7 @@ package com.paymentic.domain.repositories;
 
 import com.paymentic.domain.Book;
 import com.paymentic.domain.BookType;
+import com.paymentic.domain.ids.BookId;
 import com.paymentic.domain.ids.ShelfId;
 import com.paymentic.domain.repositories.data.PaymentBooks;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
@@ -26,6 +27,10 @@ public class BookRepository implements PanacheRepository<Book> {
   }
   private Book findByShelfIdAndType(ShelfId shelfId, BookType type){
     return find("shelf.id = :shelfId and type = :type",Parameters.with("shelfId", shelfId.getId()).and("type",type)).firstResult();
+  }
+
+  public Book bookByShelfAndId(ShelfId shelfId, BookId bookId){
+    return find("shelf.id = :shelfId",Parameters.with("shelfId", shelfId.getId()).and("id",UUID.fromString(bookId.getId()))).firstResult();
   }
 
 }

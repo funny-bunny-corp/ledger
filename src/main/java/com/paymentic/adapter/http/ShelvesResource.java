@@ -6,8 +6,11 @@ import com.paymentic.adapter.http.apis.model.RecordsInner;
 import com.paymentic.adapter.http.apis.model.RequestShelfCreation;
 import com.paymentic.adapter.http.apis.model.Shelf;
 import com.paymentic.adapter.http.apis.model.ShelfCreated;
+import com.paymentic.adapter.http.apis.model.ShelfOwner;
+import com.paymentic.domain.Book;
 import com.paymentic.domain.application.BookService;
 import com.paymentic.domain.application.ShelfService;
+import com.paymentic.domain.ids.BookId;
 import com.paymentic.domain.ids.OwnerId;
 import com.paymentic.domain.ids.ShelfId;
 import io.smallrye.common.annotation.RunOnVirtualThread;
@@ -42,13 +45,20 @@ public class ShelvesResource implements ShelvesApi {
 
   @Override
   public List<RecordsInner> getRecords(String id, String bookId) {
-    return null;
+    var book = this.bookService.bookByShelfAndId(new ShelfId(UUID.fromString(id)),
+        new BookId(bookId));
+    return book.getEntries().stream().map(entry -> new RecordsInner()
+        .id(entry.getId().toString())
+        .at(entry.getAt().toLocalDate())
+        .amount(entry.getAmount().doubleValue())
+        .type(entry.getOperationType().toString())
+        .currency(entry.getCurrency())).collect(Collectors.toList());
   }
 
   @Override
   public Shelf getShelf(String id) {
     var data = this.shelfService.get(id);
-    return new Shelf().id(data.getId().toString());
+    return new Shelf().id(data.getId().toString()).owner(new ShelfOwner().id(data.getOwner().getId()));
   }
 
 }

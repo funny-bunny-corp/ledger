@@ -97,3 +97,8 @@ Easily start your RESTful Web Services
 Monitor your application's health using SmallRye Health
 
 [Related guide section...](https://quarkus.io/guides/smallrye-health)
+
+
+### Ledger Reference
+
+[Ledger concepts](https://developer.squareup.com/blog/books-an-immutable-double-entry-accounting-database-service/)

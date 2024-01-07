@@ -18,7 +18,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity(name = "book_entry")
 public class BookEntry {
-
   @Id
   @Column(name = "book_entry_id")
   @GeneratedValue(generator = "UUID")
@@ -38,24 +37,33 @@ public class BookEntry {
   @Column(name = "operation_type")
   @Enumerated(value = EnumType.STRING)
   private OperationType operationType;
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name="fromAmount",column=@Column(name="from_amount")),
+      @AttributeOverride(name="toAmount",column=@Column(name="to_amount")),
+  })
+  private AmountSnapshot snapshot;
+
+  public Integer version;
   public BookEntry() {
   }
   public BookEntry(LocalDateTime at, JournalEntryId journalEntry,
-      BigDecimal amount, String currency, OperationType operationType,Book book) {
+      BigDecimal amount, String currency, OperationType operationType,Book book,Integer version) {
     this.at = at;
     this.journalEntry = journalEntry;
     this.amount = amount;
     this.operationType = operationType;
     this.currency = currency;
     this.book = book;
+    this.version = version;
   }
   public static BookEntry paymentEntry(JournalEntryId journalEntry,
-      BigDecimal amount,String currency,Book book){
-    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.CREDIT,book);
+      BigDecimal amount,String currency,Book book,Integer version){
+    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.CREDIT,book,version);
   }
   public static BookEntry pendingEntry(JournalEntryId journalEntry,
-      BigDecimal amount,String currency,Book book){
-    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT,book);
+      BigDecimal amount,String currency,Book book,Integer version){
+    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT,book,version);
   }
   public UUID getId() {
     return id;
@@ -77,5 +85,15 @@ public class BookEntry {
   }
   public String getCurrency() {
     return currency;
+  }
+  public Integer getVersion() {
+    return version;
+  }
+  public AmountSnapshot getSnapshot() {
+    return snapshot;
+  }
+  public BookEntry holdBalance(AmountSnapshot bookBalance){
+    this.snapshot = bookBalance;
+    return this;
   }
 }

@@ -54,5 +54,8 @@ public class Shelf {
   public Set<JournalEntry> getJournals() {
     return journals;
   }
+  public VersionNumber version(){
+    return new VersionNumber(this.journals.size());
+  }
 
 }

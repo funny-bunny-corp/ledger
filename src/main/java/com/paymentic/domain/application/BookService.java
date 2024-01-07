@@ -5,6 +5,7 @@ import com.paymentic.domain.BookEntry;
 import com.paymentic.domain.events.JournalEntryRegistered;
 import com.paymentic.domain.events.PaymentBookEntryRegistered;
 import com.paymentic.domain.events.ShelfRegistered;
+import com.paymentic.domain.ids.BookId;
 import com.paymentic.domain.ids.ShelfId;
 import com.paymentic.domain.repositories.BookRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,8 +34,9 @@ public class BookService {
   public void recordBookEntries(@Observes JournalEntryRegistered journalEntryRegistered){
     var books = this.bookRepository.findBooksForPayment(journalEntryRegistered.shelfId());
     books.addPayment(BookEntry.paymentEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),
-        journalEntryRegistered.currency(),books.payment()));
-    books.addPending(BookEntry.pendingEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),journalEntryRegistered.currency(),books.pending()));
+        journalEntryRegistered.currency(),books.payment(),journalEntryRegistered.versionNumber().version()),journalEntryRegistered.versionNumber());
+    books.addPending(BookEntry.pendingEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),
+        journalEntryRegistered.currency(),books.pending(),journalEntryRegistered.versionNumber().version()),journalEntryRegistered.versionNumber());
     this.bookRepository.persist(books.payment());
     this.bookRepository.persist(books.pending());
     this.trigger.fire(new PaymentBookEntryRegistered(journalEntryRegistered.journalEntryId(),journalEntryRegistered.paymentOrderId()));
@@ -47,6 +49,9 @@ public class BookService {
         Book.newPayoutBook(UUID.randomUUID().toString(),new ShelfId(shelfRegistered.shelfId().getId())),
         Book.newRefundBook(UUID.randomUUID().toString(),new ShelfId(shelfRegistered.shelfId().getId()))
     );
+  }
+  public Book bookByShelfAndId(ShelfId shelfId, BookId bookId){
+    return this.bookRepository.bookByShelfAndId(shelfId,bookId);
   }
 
 }

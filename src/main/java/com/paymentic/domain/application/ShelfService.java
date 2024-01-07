@@ -1,6 +1,7 @@
 package com.paymentic.domain.application;
 
 import com.paymentic.domain.JournalEntry;
+import com.paymentic.domain.Metadata;
 import com.paymentic.domain.PaymentOrder;
 import com.paymentic.domain.Shelf;
 import com.paymentic.domain.TransactionType;
@@ -24,7 +25,6 @@ public class ShelfService {
   private final Event<JournalEntryRegistered> trigger;
   private final ShelfRepository shelfRepository;
   private final Event<ShelfRegistered> shelfTrigger;
-
   public ShelfService(Event<JournalEntryRegistered> trigger,
       ShelfRepository shelfRepository, Event<ShelfRegistered> shelfTrigger) {
     this.trigger = trigger;
@@ -43,10 +43,11 @@ public class ShelfService {
   public void recordJournal(@Observes TransactionRegistered event){
     var paymentOrder = PaymentOrder.newPaymentOrder(event.getTransaction(),event.getSeller(),new PaymentOrderId(event.getPayment().getId()),event.getCheckout(),event.getAmount(),event.getCurrency());
     Shelf shelf = this.shelfRepository.byOwner(new OwnerId(event.getSeller().getSellerId()));
-    var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),paymentOrder,shelf);
+    var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),
+        Metadata.newMetadataWithPaymentOrder(paymentOrder),shelf);
     shelf.addEntry(journal);
     this.shelfRepository.persist(shelf);
-    this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSeller(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment()));
+    this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSeller(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment(),shelf.version()));
   }
 
 }

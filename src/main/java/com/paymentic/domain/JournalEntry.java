@@ -25,24 +25,24 @@ public class JournalEntry {
   @Column(name = "registered_at")
   private LocalDateTime registeredAt;
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "payment_order")
-  private PaymentOrder paymentOrder;
+  @Column(name = "metadata")
+  private Metadata metadata;
   @ManyToOne
   private Shelf shelf;
   public JournalEntry() {
   }
   public JournalEntry(UUID id,TransactionType journalEntryType, String idempotenceKey,
-      LocalDateTime registeredAt, PaymentOrder paymentOrder,Shelf shelf) {
+      LocalDateTime registeredAt, Metadata metadata,Shelf shelf) {
     this.id = id;
     this.journalEntryType = journalEntryType;
     this.idempotenceKey = idempotenceKey;
     this.registeredAt = registeredAt;
-    this.paymentOrder = paymentOrder;
+    this.metadata = metadata;
     this.shelf = shelf;
   }
   public static JournalEntry newJournalEntry(TransactionType journalEntryType, String idempotenceKey,
-       PaymentOrder paymentOrder,Shelf shelf){
-    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),paymentOrder,shelf);
+      Metadata metadata,Shelf shelf){
+    return new JournalEntry(UUID.randomUUID(),journalEntryType,idempotenceKey,LocalDateTime.now(),metadata,shelf);
   }
   public UUID getId() {
     return id;
@@ -56,10 +56,11 @@ public class JournalEntry {
   public LocalDateTime getRegisteredAt() {
     return registeredAt;
   }
-  public PaymentOrder getPaymentOrder() {
-    return paymentOrder;
-  }
   public Shelf getShelf() {
     return shelf;
   }
+  public Metadata getMetadata() {
+    return metadata;
+  }
+
 }
