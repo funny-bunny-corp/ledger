@@ -70,11 +70,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "ledger.fullname" . }}
                   key: username
-            - name: JAAS_CONFIG
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "ledger.fullname" . }}
-                  key: kafka_jaas
             - name: OTEL_RESOURCE_ATTRIBUTES
               valueFrom:
                 configMapKeyRef:
@@ -89,6 +84,11 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: otel_otlp_endpoint
+                  name:  {{ include "ledger.fullname" . }}
+            - name: QUARKUS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  key: profile
                   name:  {{ include "ledger.fullname" . }}
       {{- with .Values.volumes }}
       volumes:
