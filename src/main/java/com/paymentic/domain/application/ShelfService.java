@@ -6,6 +6,7 @@ import com.paymentic.domain.PaymentOrder;
 import com.paymentic.domain.Shelf;
 import com.paymentic.domain.TransactionType;
 import com.paymentic.domain.events.JournalEntryRegistered;
+import com.paymentic.domain.events.JournalEntryUnregistered;
 import com.paymentic.domain.events.ShelfRegistered;
 import com.paymentic.domain.events.TransactionRegistered;
 import com.paymentic.domain.ids.JournalEntryId;
@@ -18,6 +19,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
+import java.util.Objects;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -25,11 +27,14 @@ public class ShelfService {
   private final Event<JournalEntryRegistered> trigger;
   private final ShelfRepository shelfRepository;
   private final Event<ShelfRegistered> shelfTrigger;
+  private final Event<JournalEntryUnregistered> journalUnregistered;
   public ShelfService(Event<JournalEntryRegistered> trigger,
-      ShelfRepository shelfRepository, Event<ShelfRegistered> shelfTrigger) {
+      ShelfRepository shelfRepository, Event<ShelfRegistered> shelfTrigger,
+      Event<JournalEntryUnregistered> journalUnregistered) {
     this.trigger = trigger;
     this.shelfRepository = shelfRepository;
     this.shelfTrigger = shelfTrigger;
+    this.journalUnregistered = journalUnregistered;
   }
   @Transactional
   public void register(Shelf shelf){
@@ -43,11 +48,16 @@ public class ShelfService {
   public void recordJournal(@Observes TransactionRegistered event){
     var paymentOrder = PaymentOrder.newPaymentOrder(event.getTransaction(),event.getSeller(),new PaymentOrderId(event.getPayment().getId()),event.getCheckout(),event.getAmount(),event.getCurrency());
     Shelf shelf = this.shelfRepository.byOwner(new OwnerId(event.getSeller().getSellerId()));
-    var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),
-        Metadata.newMetadataWithPaymentOrder(paymentOrder),shelf);
-    shelf.addEntry(journal);
-    this.shelfRepository.persist(shelf);
-    this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSeller(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment(),shelf.version()));
+    if (Objects.isNull(shelf)){
+      this.journalUnregistered.fire(new JournalEntryUnregistered(event.getTransaction(),event.getAmount(),event.getCurrency(),event.getCheckout(),
+          event.getBuyer(),event.getPayment(),event.getSeller()));
+    }else{
+      var journal = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),
+          Metadata.newMetadataWithPaymentOrder(paymentOrder),shelf);
+      shelf.addEntry(journal);
+      this.shelfRepository.persist(shelf);
+      this.trigger.fire(new JournalEntryRegistered(event.getBuyer(),event.getSeller(),new JournalEntryId(journal.getId().toString()),new ShelfId(shelf.getId()),event.getAmount(),event.getCurrency(),paymentOrder.getPayment(),shelf.version()));
+    }
   }
 
 }
