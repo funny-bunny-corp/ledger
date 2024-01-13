@@ -1,6 +1,6 @@
 package com.paymentic.infra.app;
 
-import com.paymentic.adapter.kafka.TransactionRegisteredProcessor;
+import com.paymentic.adapter.kafka.in.TransactionRegisteredProcessor;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.runtime.configuration.ProfileManager;
 import jakarta.enterprise.context.ApplicationScoped;

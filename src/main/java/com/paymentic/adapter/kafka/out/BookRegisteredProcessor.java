@@ -1,7 +1,10 @@
-package com.paymentic.adapter.kafka;
+package com.paymentic.adapter.kafka.out;
 
 import com.paymentic.domain.events.PaymentBookEntryRegistered;
 import com.paymentic.domain.events.TransactionBooked;
+import com.paymentic.infra.ce.CExtensions.Audience;
+import com.paymentic.infra.ce.CExtensions.EventContext;
+import com.paymentic.infra.ce.ExtensionsBuilder;
 import io.smallrye.reactive.messaging.ce.OutgoingCloudEventMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -17,7 +20,11 @@ public class BookRegisteredProcessor {
     this.emitter = emitter;
   }
   public void notifyBooking(@Observes(during = TransactionPhase.AFTER_COMPLETION) PaymentBookEntryRegistered bookEntryRegistered) {
-    this.emitter.send(Message.of(new TransactionBooked(bookEntryRegistered.paymentOrderId())).addMetadata(OutgoingCloudEventMetadata.builder().build()));
+    var metadata = OutgoingCloudEventMetadata.builder()
+        .withExtensions(new ExtensionsBuilder().audience(Audience.EXTERNAL_BOUNDED_CONTEXT).eventContext(
+            EventContext.DOMAIN).build())
+        .build();
+    this.emitter.send(Message.of(new TransactionBooked(bookEntryRegistered.paymentOrderId())).addMetadata(metadata));
   }
 
 }

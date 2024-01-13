@@ -10,7 +10,6 @@ import org.jboss.logging.Logger;
 public class EventRepository implements PanacheRepository<Event> {
   private static final Logger LOGGER = Logger.getLogger(EventRepository.class);
   private static final String ERROR = "Error to persist Event Id %s ";
-
   @Transactional
   public boolean shouldHandle(Event event) {
     try {
