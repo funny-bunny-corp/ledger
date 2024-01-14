@@ -65,6 +65,10 @@ public class BookEntry {
       BigDecimal amount,String currency,Book book,Integer version){
     return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT,book,version);
   }
+  public static BookEntry payoutEntry(JournalEntryId journalEntry,
+      BigDecimal amount,String currency,Book book,Integer version){
+    return new BookEntry(LocalDateTime.now(),journalEntry,amount,currency,OperationType.DEBIT,book,version);
+  }
   public UUID getId() {
     return id;
   }

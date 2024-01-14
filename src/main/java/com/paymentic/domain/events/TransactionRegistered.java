@@ -5,7 +5,6 @@ import com.paymentic.domain.shared.CheckoutId;
 import com.paymentic.domain.shared.PaymentOrderId;
 import com.paymentic.domain.shared.SellerInfo;
 import com.paymentic.domain.shared.TransactionId;
-import java.util.UUID;
 
 public class TransactionRegistered {
   private TransactionId transaction;

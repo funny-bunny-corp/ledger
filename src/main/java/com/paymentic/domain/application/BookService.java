@@ -1,9 +1,11 @@
 package com.paymentic.domain.application;
 
+import com.paymentic.adapter.persistence.JpaBookRepository;
 import com.paymentic.domain.Book;
 import com.paymentic.domain.BookEntry;
-import com.paymentic.domain.events.JournalEntryRegistered;
 import com.paymentic.domain.events.PaymentBookEntryRegistered;
+import com.paymentic.domain.events.PaymentJournalEntryRegistered;
+import com.paymentic.domain.events.PayoutJournalEntryRegistered;
 import com.paymentic.domain.events.ShelfRegistered;
 import com.paymentic.domain.ids.BookId;
 import com.paymentic.domain.ids.ShelfId;
@@ -20,7 +22,7 @@ import java.util.UUID;
 public class BookService {
   private final BookRepository bookRepository;
   private final Event<PaymentBookEntryRegistered> trigger;
-  public BookService(BookRepository bookRepository, Event<PaymentBookEntryRegistered> trigger) {
+  public BookService(JpaBookRepository bookRepository, Event<PaymentBookEntryRegistered> trigger) {
     this.bookRepository = bookRepository;
     this.trigger = trigger;
   }
@@ -31,19 +33,41 @@ public class BookService {
     return this.bookRepository.booksByShelf(shelfId);
   }
   @Transactional
-  public void recordBookEntries(@Observes JournalEntryRegistered journalEntryRegistered){
-    var books = this.bookRepository.findBooksForPayment(journalEntryRegistered.shelfId());
-    books.addPayment(BookEntry.paymentEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),
-        journalEntryRegistered.currency(),books.payment(),journalEntryRegistered.versionNumber().version()),journalEntryRegistered.versionNumber());
-    books.addPending(BookEntry.pendingEntry(journalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(journalEntryRegistered.amount())),
-        journalEntryRegistered.currency(),books.pending(),journalEntryRegistered.versionNumber().version()),journalEntryRegistered.versionNumber());
-    this.bookRepository.persist(books.payment());
-    this.bookRepository.persist(books.pending());
-    this.trigger.fire(new PaymentBookEntryRegistered(journalEntryRegistered.journalEntryId(),journalEntryRegistered.paymentOrderId()));
+  public void recordPaymentInBooks(@Observes PaymentJournalEntryRegistered paymentJournalEntryRegistered){
+    var books = this.bookRepository.findBooksForPayment(paymentJournalEntryRegistered.shelfId());
+    books.addPayment(BookEntry.paymentEntry(paymentJournalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(
+            paymentJournalEntryRegistered.amount())),
+        paymentJournalEntryRegistered.currency(),books.payment(),
+        paymentJournalEntryRegistered.versionNumber().version()), paymentJournalEntryRegistered.versionNumber());
+    books.addPending(BookEntry.pendingEntry(paymentJournalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(
+            paymentJournalEntryRegistered.amount())),
+        paymentJournalEntryRegistered.currency(),books.pending(),
+        paymentJournalEntryRegistered.versionNumber().version()), paymentJournalEntryRegistered.versionNumber());
+    this.bookRepository.save(books.payment());
+    this.bookRepository.save(books.pending());
+    this.trigger.fire(new PaymentBookEntryRegistered(paymentJournalEntryRegistered.journalEntryId(),
+        paymentJournalEntryRegistered.paymentOrderId()));
   }
   @Transactional
+  public void recordPayoutInBooks(@Observes PayoutJournalEntryRegistered payoutJournalEntryRegistered){
+    var books = this.bookRepository.findBooksForPayout(payoutJournalEntryRegistered.shelfId());
+    books.addPayout(BookEntry.payoutEntry(payoutJournalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(
+            payoutJournalEntryRegistered.amount())),
+        payoutJournalEntryRegistered.currency(),books.payout(),
+        payoutJournalEntryRegistered.versionNumber().version()), payoutJournalEntryRegistered.versionNumber());
+    books.addPending(BookEntry.pendingEntry(payoutJournalEntryRegistered.journalEntryId(), BigDecimal.valueOf(Double.parseDouble(
+            payoutJournalEntryRegistered.amount())),
+        payoutJournalEntryRegistered.currency(),books.pending(),
+        payoutJournalEntryRegistered.versionNumber().version()), payoutJournalEntryRegistered.versionNumber());
+    this.bookRepository.save(books.payout());
+    this.bookRepository.save(books.pending());
+//    this.trigger.fire(new PaymentBookEntryRegistered(payoutJournalEntryRegistered.journalEntryId(),
+//        payoutJournalEntryRegistered.paymentOrderId()));
+  }
+
+  @Transactional
   public void registerBooks(@Observes ShelfRegistered shelfRegistered){
-    this.bookRepository.persist(
+    this.bookRepository.save(
         Book.newPendingBook(UUID.randomUUID().toString(),new ShelfId(shelfRegistered.shelfId().getId())),
         Book.newPaymentBook(UUID.randomUUID().toString(),new ShelfId(shelfRegistered.shelfId().getId())),
         Book.newPayoutBook(UUID.randomUUID().toString(),new ShelfId(shelfRegistered.shelfId().getId())),
