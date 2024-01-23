@@ -1,42 +1,65 @@
 package com.paymentic.domain.application;
 
+import static java.util.function.Function.*;
+import static java.util.stream.Collectors.toMap;
+
 import com.paymentic.domain.JournalEntry;
 import com.paymentic.domain.Metadata;
 import com.paymentic.domain.Shelf;
 import com.paymentic.domain.TransactionType;
+import com.paymentic.domain.application.handlers.PaymentTransactionHandler;
+import com.paymentic.domain.application.handlers.RefundTransactionHandler;
+import com.paymentic.domain.application.handlers.TransactionHandler;
 import com.paymentic.domain.events.InFlightTransaction;
 import com.paymentic.domain.events.JournalEntryUnregistered;
 import com.paymentic.domain.events.PaymentJournalEntryRegistered;
 import com.paymentic.domain.events.PayoutJournalEntryRegistered;
+import com.paymentic.domain.events.RefundJournalEntryRegistered;
 import com.paymentic.domain.events.ShelfRegistered;
 import com.paymentic.domain.ids.JournalEntryId;
 import com.paymentic.domain.ids.OwnerId;
 import com.paymentic.domain.ids.ShelfId;
 import com.paymentic.domain.repositories.ShelfRepository;
+import io.quarkus.arc.All;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 @ApplicationScoped
 public class ShelfService {
-  private final Event<PaymentJournalEntryRegistered> paymentTrigger;
-
-  private final Event<PayoutJournalEntryRegistered> payoutTrigger;
   private final ShelfRepository shelfRepository;
   private final Event<ShelfRegistered> shelfTrigger;
   private final Event<JournalEntryUnregistered> journalUnregistered;
-  public ShelfService(Event<PaymentJournalEntryRegistered> paymentTrigger,
+  private final PaymentTransactionHandler paymentTransactionHandler;
+  private final RefundTransactionHandler refundTransactionHandler;
+  private final PaymentTransactionHandler payoutTransactionHandler;
+  Map<TransactionType, TransactionHandler> handlers;
+  public ShelfService(
       ShelfRepository shelfRepository, Event<ShelfRegistered> shelfTrigger,
       Event<JournalEntryUnregistered> journalUnregistered,
-      Event<PayoutJournalEntryRegistered> payoutTrigger) {
-    this.paymentTrigger = paymentTrigger;
+      PaymentTransactionHandler paymentTransactionHandler,
+      RefundTransactionHandler refundTransactionHandler,
+      PaymentTransactionHandler payoutTransactionHandler) {
     this.shelfRepository = shelfRepository;
     this.shelfTrigger = shelfTrigger;
     this.journalUnregistered = journalUnregistered;
-    this.payoutTrigger = payoutTrigger;
+    this.paymentTransactionHandler = paymentTransactionHandler;
+    this.refundTransactionHandler = refundTransactionHandler;
+    this.payoutTransactionHandler = payoutTransactionHandler;
+  }
+  @PostConstruct
+  void setup(){
+    this.handlers = Map.of(TransactionType.PAYMENT,this.paymentTransactionHandler,
+        TransactionType.REFUND,this.refundTransactionHandler,
+        TransactionType.PAYOUT,this.payoutTransactionHandler);
   }
   @Transactional
   public void register(Shelf shelf){
@@ -53,22 +76,7 @@ public class ShelfService {
       this.journalUnregistered.fire(new JournalEntryUnregistered(event.getPayment().getTransaction(),event.getPayment().getAmount(),event.getPayment().getCurrency(),event.getPayment().getCheckoutId(),
           event.getPayment().getBuyer(),event.getPayment().getPayment(),event.getSeller()));
     }else{
-      switch (event.getType()){
-        case PAYMENT -> {
-          var paymentEntry = JournalEntry.newJournalEntry(TransactionType.PAYMENT, UUID.randomUUID().toString(),
-              Metadata.newMetadataWithPaymentOrder(event.getPayment()),shelf);
-          shelf.addEntry(paymentEntry);
-          this.shelfRepository.save(shelf);
-          this.paymentTrigger.fire(new PaymentJournalEntryRegistered(event.getPayment().getBuyer(),event.getSeller(),new JournalEntryId(paymentEntry.getId().toString()),new ShelfId(shelf.getId()),event.getPayment().getAmount(),event.getPayment().getCurrency(),event.getPayment()
-              .getPayment(),shelf.version()));
-        }case PAYOUT -> {
-          var payoutEntry = JournalEntry.newJournalEntry(TransactionType.PAYOUT, UUID.randomUUID().toString(),
-              Metadata.newMetadataWithPayoutOrder(event.getPayout()),shelf);
-          shelf.addEntry(payoutEntry);
-          this.shelfRepository.save(shelf);
-          this.payoutTrigger.fire(new PayoutJournalEntryRegistered(event.getSeller(),new JournalEntryId(payoutEntry.getId().toString()),new ShelfId(shelf.getId()),event.getPayout().getAmount(),event.getPayout().getCurrency(),shelf.version()));
-        }
-      }
+      this.handlers.get(event.getType()).handle(event,shelf);
     }
   }
 
