@@ -19,7 +19,7 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class TransactionRegisteredProcessor {
-  private static final String TRANSACTION_REGISTERED_EVENT_TYPE = "paymentic.payments-gateway.v1.transaction-registered";
+  private static final String TRANSACTION_REGISTERED_EVENT_TYPE = "paymentic.io.merchant-account.v1.transaction.registered";
   private static final String PAYMENT_CREATE_SUBJECT = "payment-created";
   private static final String REFUND_CREATE_SUBJECT = "refund-created";
   private static final Logger LOGGER = Logger.getLogger(TransactionRegisteredProcessor.class);
