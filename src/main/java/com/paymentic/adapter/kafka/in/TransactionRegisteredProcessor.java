@@ -33,22 +33,25 @@ public class TransactionRegisteredProcessor {
   }
   @Blocking
   @Incoming("transaction-registered")
-  public CompletionStage<Void> process(Message<TransactionRegistered> message) {
+  public CompletionStage<Void> process(Message<TransactionRegistered> message) throws Throwable {
     var event = message.getMetadata(IncomingCloudEventMetadata.class).orElseThrow(() -> new IllegalArgumentException("Expected a Cloud Event"));
     var handle = eventRepository.shouldHandle(new com.paymentic.infra.events.Event(UUID.fromString(event.getId())));
     if (handle){
       if (TRANSACTION_REGISTERED_EVENT_TYPE.equals(event.getType())){
         LOGGER.info("Receiving transaction registered event. Start processing....");
         var transactionEvent = message.getPayload();
-        switch (event.getType()){
-          case PAYMENT_CREATE_SUBJECT -> {
-            var paymentOrder = PaymentOrder.newPaymentOrder(transactionEvent.getTransaction(),transactionEvent.getSeller(),new PaymentOrderId(transactionEvent.getPayment().getId()),transactionEvent.getCheckout(),transactionEvent.getAmount(),transactionEvent.getCurrency(),transactionEvent.getBuyer());
-            var transaction = InFlightTransaction.createWithPayment(transactionEvent.getTransaction(),transactionEvent.getSeller(), TransactionType.PAYMENT,paymentOrder);
-            this.trigger.fire(transaction);
-          }case REFUND_CREATE_SUBJECT -> {
-            var refund = Refund.newRefund(transactionEvent.getTransaction(),transactionEvent.getSeller(),new PaymentOrderId(transactionEvent.getPayment().getId()),transactionEvent.getAmount(),transactionEvent.getCurrency(),transactionEvent.getBuyer());
-            var transaction = InFlightTransaction.createWithRefund(transactionEvent.getTransaction(),transactionEvent.getSeller(), TransactionType.REFUND,refund);
-            this.trigger.fire(transaction);
+        if (event.getSubject().isPresent()){
+          String sub = (String) event.getSubject().get();
+          switch (sub){
+            case PAYMENT_CREATE_SUBJECT -> {
+              var paymentOrder = PaymentOrder.newPaymentOrder(transactionEvent.getTransaction(),transactionEvent.getSeller(),new PaymentOrderId(transactionEvent.getPayment().getId()),transactionEvent.getCheckout(),transactionEvent.getAmount(),transactionEvent.getCurrency(),transactionEvent.getBuyer());
+              var transaction = InFlightTransaction.createWithPayment(transactionEvent.getTransaction(),transactionEvent.getSeller(), TransactionType.PAYMENT,paymentOrder);
+              this.trigger.fire(transaction);
+            }case REFUND_CREATE_SUBJECT -> {
+              var refund = Refund.newRefund(transactionEvent.getTransaction(),transactionEvent.getSeller(),new PaymentOrderId(transactionEvent.getPayment().getId()),transactionEvent.getAmount(),transactionEvent.getCurrency(),transactionEvent.getBuyer());
+              var transaction = InFlightTransaction.createWithRefund(transactionEvent.getTransaction(),transactionEvent.getSeller(), TransactionType.REFUND,refund);
+              this.trigger.fire(transaction);
+            }
           }
         }
         LOGGER.info("Transaction registered event processed!");
