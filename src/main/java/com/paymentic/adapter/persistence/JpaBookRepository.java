@@ -38,7 +38,7 @@ public class JpaBookRepository implements PanacheRepository<Book>,
   }
 
   public Book bookByShelfAndId(ShelfId shelfId, BookId bookId){
-    return find("shelf.id = :shelfId",Parameters.with("shelfId", shelfId.getId()).and("id",UUID.fromString(bookId.getId()))).firstResult();
+    return find("shelf.id = :shelfId and id = :id",Parameters.with("shelfId", shelfId.getId()).and("id",UUID.fromString(bookId.getId()))).firstResult();
   }
   @Override
   public void save(Book book) {
