@@ -9,6 +9,7 @@ import io.smallrye.reactive.messaging.ce.OutgoingCloudEventMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
+import java.time.LocalDateTime;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
@@ -24,7 +25,8 @@ public class BookRegisteredProcessor {
         .withExtensions(new ExtensionsBuilder().audience(Audience.EXTERNAL_BOUNDED_CONTEXT).eventContext(
             EventContext.DOMAIN).build())
         .build();
-    this.emitter.send(Message.of(new TransactionBooked(bookEntryRegistered.paymentOrderId())).addMetadata(metadata));
+    this.emitter.send(Message.of(new TransactionBooked(bookEntryRegistered.paymentOrderId(),
+        LocalDateTime.now())).addMetadata(metadata));
   }
 
 }
