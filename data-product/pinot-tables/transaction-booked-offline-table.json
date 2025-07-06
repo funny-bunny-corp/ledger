@@ -119,27 +119,7 @@
             }
           }
         }
-      ]
-    },
-    "transformConfig": {
-      "transformFunctions": [
-        {
-          "columnName": "buyerEmail",
-          "transformFunction": "hash(buyerEmail, 'SHA256')"
-        },
-        {
-          "columnName": "sellerEmail",
-          "transformFunction": "hash(sellerEmail, 'SHA256')"
-        },
-        {
-          "columnName": "buyerName",
-          "transformFunction": "hash(buyerName, 'SHA256')"
-        },
-        {
-          "columnName": "sellerName",
-          "transformFunction": "hash(sellerName, 'SHA256')"
-        }
-      ]
+            ]
     }
   },
   "tierConfigs": [
