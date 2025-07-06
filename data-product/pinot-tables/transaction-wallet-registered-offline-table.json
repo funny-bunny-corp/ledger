@@ -1,0 +1,151 @@
+{
+  "tableName": "transaction_wallet_registered_offline",
+  "tableType": "OFFLINE",
+  "segmentsConfig": {
+    "timeColumnName": "registeredAt",
+    "timeType": "TIMESTAMP",
+    "schemaName": "transaction_wallet_registered",
+    "replication": "3",
+    "retentionTimeUnit": "YEARS",
+    "retentionTimeValue": "7"
+  },
+  "tenants": {
+    "broker": "payment_broker",
+    "server": "payment_server"
+  },
+  "tableIndexConfig": {
+    "loadMode": "MMAP",
+    "invertedIndexColumns": [
+      "transactionId",
+      "paymentOrderId",
+      "checkoutId",
+      "buyerId",
+      "sellerId",
+      "transactionType",
+      "currency"
+    ],
+    "sortedColumn": [
+      "registeredAt"
+    ],
+    "bloomFilterColumns": [
+      "transactionId",
+      "paymentOrderId"
+    ],
+    "rangeIndexColumns": [
+      "registeredAt",
+      "amount"
+    ],
+    "jsonIndexColumns": [
+      "metadata"
+    ],
+    "aggregateMetrics": true,
+    "starTreeIndexConfigs": [
+      {
+        "dimensionsSplitOrder": [
+          "transactionType",
+          "currency",
+          "sellerId",
+          "buyerId"
+        ],
+        "skipStarNodeCreationForDimensions": [],
+        "functionColumnPairs": [
+          "COUNT__*",
+          "SUM__amount",
+          "AVG__amount",
+          "MIN__amount",
+          "MAX__amount"
+        ],
+        "maxLeafRecords": 10000
+      }
+    ]
+  },
+  "fieldConfigList": [
+    {
+      "name": "transactionId",
+      "encodingType": "DICTIONARY",
+      "indexType": "INVERTED"
+    },
+    {
+      "name": "paymentOrderId", 
+      "encodingType": "DICTIONARY",
+      "indexType": "INVERTED"
+    },
+    {
+      "name": "amount",
+      "encodingType": "RAW",
+      "indexType": "RANGE"
+    },
+    {
+      "name": "buyerEmail",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(buyerEmail, 'SHA256')"
+    },
+    {
+      "name": "sellerEmail",
+      "encodingType": "DICTIONARY", 
+      "transformFunction": "hash(sellerEmail, 'SHA256')"
+    },
+    {
+      "name": "buyerName",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(buyerName, 'SHA256')"
+    },
+    {
+      "name": "sellerName",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(sellerName, 'SHA256')"
+    }
+  ],
+  "ingestionConfig": {
+    "batchIngestionConfig": {
+      "segmentIngestionType": "APPEND",
+      "segmentIngestionFrequency": "DAILY",
+      "batchConfigMaps": [
+        {
+          "inputDirURI": "s3://paymentic-data-lake/transaction-wallet-registered/",
+          "inputFormat": "parquet",
+          "outputDirURI": "s3://paymentic-pinot-segments/transaction-wallet-registered-offline/",
+          "recordReaderSpec": {
+            "readerConfigSpec": {
+              "className": "org.apache.pinot.plugin.inputformat.parquet.ParquetRecordReader"
+            }
+          }
+        }
+      ]
+    },
+    "transformConfig": {
+      "transformFunctions": [
+        {
+          "columnName": "buyerEmail",
+          "transformFunction": "hash(buyerEmail, 'SHA256')"
+        },
+        {
+          "columnName": "sellerEmail",
+          "transformFunction": "hash(sellerEmail, 'SHA256')"
+        },
+        {
+          "columnName": "buyerName",
+          "transformFunction": "hash(buyerName, 'SHA256')"
+        },
+        {
+          "columnName": "sellerName",
+          "transformFunction": "hash(sellerName, 'SHA256')"
+        }
+      ]
+    }
+  },
+  "tierConfigs": [
+    {
+      "name": "hotTier",
+      "segmentSelectorType": "time",
+      "segmentAge": "30d",
+      "storageType": "pinot_server"
+    },
+    {
+      "name": "coldTier",
+      "segmentSelectorType": "time", 
+      "segmentAge": "1y",
+      "storageType": "pinot_server"
+    }
+  ]
+}
