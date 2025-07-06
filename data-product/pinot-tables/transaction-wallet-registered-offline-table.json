@@ -77,23 +77,19 @@
     },
     {
       "name": "buyerEmail",
-      "encodingType": "DICTIONARY",
-      "transformFunction": "hash(buyerEmail, 'SHA256')"
+      "encodingType": "DICTIONARY"
     },
     {
       "name": "sellerEmail",
-      "encodingType": "DICTIONARY", 
-      "transformFunction": "hash(sellerEmail, 'SHA256')"
+      "encodingType": "DICTIONARY"
     },
     {
       "name": "buyerName",
-      "encodingType": "DICTIONARY",
-      "transformFunction": "hash(buyerName, 'SHA256')"
+      "encodingType": "DICTIONARY"
     },
     {
       "name": "sellerName",
-      "encodingType": "DICTIONARY",
-      "transformFunction": "hash(sellerName, 'SHA256')"
+      "encodingType": "DICTIONARY"
     }
   ],
   "ingestionConfig": {
