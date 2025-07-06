@@ -1,0 +1,114 @@
+{
+  "schemaName": "transaction_booked",
+  "dimensionFieldSpecs": [
+    {
+      "name": "eventId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "eventType",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "eventSource",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "transactionId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "paymentOrderId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "journalEntryId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "currency",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "transactionType",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "bookingStatus",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "buyerId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "buyerEmail",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "buyerName",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "sellerId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "sellerEmail",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "sellerName",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "merchantId",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "metadata",
+      "dataType": "JSON",
+      "notNull": false
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "amount",
+      "dataType": "DOUBLE",
+      "notNull": true
+    }
+  ],
+  "timeFieldSpec": {
+    "incomingGranularitySpec": {
+      "name": "bookedAt",
+      "dataType": "TIMESTAMP",
+      "timeType": "TIMESTAMP",
+      "timeFormat": "1:MILLISECONDS:EPOCH",
+      "timeUnitSize": 1
+    }
+  },
+  "dateTimeFieldSpecs": [
+    {
+      "name": "eventTime",
+      "dataType": "TIMESTAMP",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}

@@ -1,0 +1,294 @@
+apiVersion: dataproduct.meshplatform.io/v1alpha1
+kind: DataProduct
+metadata:
+  name: payment-service-data-product
+  namespace: paymentic-payments
+  labels:
+    domain: payments
+    team: payment-engineering
+    source-aligned: "true"
+spec:
+  # Data Product Identity
+  displayName: "Payment Service Data Product"
+  description: "Source-aligned data product for the Paymentic payment service domain, providing transactional payment data and analytics capabilities"
+  version: "1.0.0"
+  
+  # Domain-Driven Design Context
+  boundedContext:
+    domain: payments
+    subdomain: payment-processing
+    context: payment-transactions
+    
+  # Data Mesh Principles
+  ownership:
+    team: payment-engineering
+    productOwner: "payment-team-lead@paymentic.com"
+    technicalOwner: "payment-tech-lead@paymentic.com"
+    
+  # Source Alignment
+  sourceAlignment:
+    sourceSystem: payment-service
+    sourceType: event-driven
+    eventSources:
+      - kafkaTopic: payments
+        partitions: 3
+        replication: 3
+        
+  # Data Assets
+  dataAssets:
+    - name: transaction-wallet-registered
+      type: event-stream
+      description: "Stream of transaction wallet registration events"
+      schema:
+        $ref: "#/components/schemas/TransactionWalletRegisteredEvent"
+      realTimeTable: transaction_wallet_registered_rt
+      offlineTable: transaction_wallet_registered_offline
+      
+    - name: transaction-booked
+      type: event-stream  
+      description: "Stream of transaction booking events"
+      schema:
+        $ref: "#/components/schemas/TransactionBookedEvent"
+      realTimeTable: transaction_booked_rt
+      offlineTable: transaction_booked_offline
+      
+    - name: payment-analytics
+      type: analytical-view
+      description: "Analytical view combining payment transactions and bookings"
+      derivedFrom: 
+        - transaction-wallet-registered
+        - transaction-booked
+      analyticalTable: payment_analytics
+      
+  # Service Level Objectives
+  slo:
+    availability: 99.9%
+    latency:
+      realTime: <100ms
+      batch: <5min
+    freshness:
+      realTime: <1s
+      batch: <1h
+    accuracy: 99.99%
+    
+  # Data Governance
+  governance:
+    dataClassification: restricted
+    retention: 
+      realTime: 7days
+      offline: 7years
+    privacy:
+      piiFields: 
+        - buyer.email
+        - buyer.name
+        - seller.email
+        - seller.name
+      anonymization: hash-based
+      
+  # Data Quality
+  quality:
+    completeness: 99.9%
+    validity: 99.9%
+    consistency: 99.9%
+    timeliness: 99.9%
+    
+  # Data Contracts
+  contracts:
+    - type: schema
+      version: "1.0"
+      evolutionary: backward-compatible
+    - type: sla
+      version: "1.0"
+      guarantees: standard
+      
+  # Discovery and Catalog
+  discoverability:
+    tags:
+      - payments
+      - transactions
+      - financial-data
+      - event-driven
+      - real-time
+    businessGlossary:
+      - term: "Transaction"
+        definition: "A monetary exchange between buyer and seller"
+      - term: "Wallet Registration"
+        definition: "Process of recording transaction in digital wallet"
+      - term: "Booking"
+        definition: "Final recording of transaction in accounting system"
+        
+  # Access Control
+  accessControl:
+    readers:
+      - team: payment-engineering
+      - team: finance-team
+      - team: compliance-team
+      - team: data-analytics
+    writers:
+      - team: payment-engineering
+    administrators:
+      - team: payment-engineering
+      - team: platform-engineering
+
+components:
+  schemas:
+    TransactionWalletRegisteredEvent:
+      type: object
+      description: "Event fired when a transaction is registered in the wallet"
+      properties:
+        specversion:
+          type: string
+          description: "CloudEvents specification version"
+          const: "1.0"
+        type:
+          type: string
+          description: "Event type"
+        source:
+          type: string
+          description: "Event source"
+        id:
+          type: string
+          description: "Unique event identifier"
+        time:
+          type: string
+          format: date-time
+          description: "Event timestamp"
+        datacontenttype:
+          type: string
+          description: "Data content type"
+        data:
+          $ref: "#/components/schemas/TransactionWalletRegisteredData"
+          
+    TransactionWalletRegisteredData:
+      type: object
+      description: "Transaction wallet registration data"
+      properties:
+        transactionId:
+          type: string
+          description: "Unique transaction identifier"
+        paymentOrderId:
+          type: string
+          description: "Payment order identifier"
+        checkoutId:
+          type: string
+          description: "Checkout session identifier"
+        amount:
+          type: string
+          description: "Transaction amount"
+        currency:
+          type: string
+          description: "Currency code (ISO 4217)"
+        transactionType:
+          type: string
+          enum: [PAYMENT, REFUND, PENDING_BALANCE, PAYOUT]
+          description: "Type of transaction"
+        buyer:
+          $ref: "#/components/schemas/BuyerInfo"
+        seller:
+          $ref: "#/components/schemas/SellerInfo"
+        metadata:
+          type: object
+          description: "Additional transaction metadata"
+        registeredAt:
+          type: string
+          format: date-time
+          description: "Wallet registration timestamp"
+          
+    TransactionBookedEvent:
+      type: object
+      description: "Event fired when a transaction is booked in records"
+      properties:
+        specversion:
+          type: string
+          description: "CloudEvents specification version"
+          const: "1.0"
+        type:
+          type: string
+          description: "Event type"
+        source:
+          type: string
+          description: "Event source"
+        id:
+          type: string
+          description: "Unique event identifier"
+        time:
+          type: string
+          format: date-time
+          description: "Event timestamp"
+        datacontenttype:
+          type: string
+          description: "Data content type"
+        data:
+          $ref: "#/components/schemas/TransactionBookedData"
+          
+    TransactionBookedData:
+      type: object
+      description: "Transaction booking data"
+      properties:
+        transactionId:
+          type: string
+          description: "Unique transaction identifier"
+        paymentOrderId:
+          type: string
+          description: "Payment order identifier"
+        journalEntryId:
+          type: string
+          description: "Journal entry identifier"
+        amount:
+          type: string
+          description: "Transaction amount"
+        currency:
+          type: string
+          description: "Currency code (ISO 4217)"
+        transactionType:
+          type: string
+          enum: [PAYMENT, REFUND, PENDING_BALANCE, PAYOUT]
+          description: "Type of transaction"
+        bookingStatus:
+          type: string
+          enum: [SUCCESS, FAILED, PENDING]
+          description: "Booking status"
+        buyer:
+          $ref: "#/components/schemas/BuyerInfo"
+        seller:
+          $ref: "#/components/schemas/SellerInfo"
+        bookedAt:
+          type: string
+          format: date-time
+          description: "Booking timestamp"
+        metadata:
+          type: object
+          description: "Additional booking metadata"
+          
+    BuyerInfo:
+      type: object
+      description: "Information about the buyer"
+      properties:
+        id:
+          type: string
+          description: "Buyer identifier"
+        email:
+          type: string
+          format: email
+          description: "Buyer email address"
+        name:
+          type: string
+          description: "Buyer name"
+        
+    SellerInfo:
+      type: object
+      description: "Information about the seller"
+      properties:
+        id:
+          type: string
+          description: "Seller identifier"
+        email:
+          type: string
+          format: email
+          description: "Seller email address"
+        name:
+          type: string
+          description: "Seller name"
+        merchantId:
+          type: string
+          description: "Merchant account identifier"

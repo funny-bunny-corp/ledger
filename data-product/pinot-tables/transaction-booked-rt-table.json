@@ -1,0 +1,240 @@
+{
+  "tableName": "transaction_booked_rt",
+  "tableType": "REALTIME",
+  "segmentsConfig": {
+    "timeColumnName": "bookedAt",
+    "timeType": "TIMESTAMP",
+    "schemaName": "transaction_booked",
+    "replication": "3",
+    "retentionTimeUnit": "DAYS",
+    "retentionTimeValue": "7"
+  },
+  "tenants": {
+    "broker": "payment_broker",
+    "server": "payment_server"
+  },
+  "tableIndexConfig": {
+    "loadMode": "MMAP",
+    "invertedIndexColumns": [
+      "transactionId",
+      "paymentOrderId",
+      "journalEntryId",
+      "buyerId",
+      "sellerId",
+      "transactionType",
+      "bookingStatus",
+      "currency"
+    ],
+    "sortedColumn": [
+      "bookedAt"
+    ],
+    "bloomFilterColumns": [
+      "transactionId",
+      "paymentOrderId",
+      "journalEntryId"
+    ],
+    "rangeIndexColumns": [
+      "bookedAt",
+      "amount"
+    ],
+    "jsonIndexColumns": [
+      "metadata"
+    ],
+    "aggregateMetrics": true,
+    "starTreeIndexConfigs": [
+      {
+        "dimensionsSplitOrder": [
+          "transactionType",
+          "bookingStatus",
+          "currency",
+          "sellerId",
+          "buyerId"
+        ],
+        "skipStarNodeCreationForDimensions": [],
+        "functionColumnPairs": [
+          "COUNT__*",
+          "SUM__amount",
+          "AVG__amount",
+          "MIN__amount",
+          "MAX__amount"
+        ],
+        "maxLeafRecords": 10000
+      }
+    ]
+  },
+  "metadata": {
+    "customConfigs": {
+      "stream.kafka.consumer.type": "lowlevel",
+      "stream.kafka.topic.name": "payments",
+      "stream.kafka.decoder.class.name": "org.apache.pinot.plugin.stream.kafka.KafkaJSONMessageDecoder",
+      "stream.kafka.consumer.factory.class.name": "org.apache.pinot.plugin.stream.kafka20.KafkaConsumerFactory",
+      "stream.kafka.zk.broker.url": "kafka-broker:9092",
+      "stream.kafka.broker.list": "kafka-broker:9092",
+      "realtime.segment.flush.threshold.time": "6h",
+      "realtime.segment.flush.threshold.size": "100M",
+      "realtime.segment.flush.autotune.initial.rows": "100000"
+    }
+  },
+  "fieldConfigList": [
+    {
+      "name": "transactionId",
+      "encodingType": "DICTIONARY",
+      "indexType": "INVERTED"
+    },
+    {
+      "name": "paymentOrderId", 
+      "encodingType": "DICTIONARY",
+      "indexType": "INVERTED"
+    },
+    {
+      "name": "journalEntryId",
+      "encodingType": "DICTIONARY",
+      "indexType": "INVERTED"
+    },
+    {
+      "name": "amount",
+      "encodingType": "RAW",
+      "indexType": "RANGE"
+    },
+    {
+      "name": "buyerEmail",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(buyerEmail, 'SHA256')"
+    },
+    {
+      "name": "sellerEmail",
+      "encodingType": "DICTIONARY", 
+      "transformFunction": "hash(sellerEmail, 'SHA256')"
+    },
+    {
+      "name": "buyerName",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(buyerName, 'SHA256')"
+    },
+    {
+      "name": "sellerName",
+      "encodingType": "DICTIONARY",
+      "transformFunction": "hash(sellerName, 'SHA256')"
+    }
+  ],
+  "ingestionConfig": {
+    "batchIngestionConfig": {
+      "segmentIngestionType": "APPEND",
+      "segmentIngestionFrequency": "DAILY"
+    },
+    "streamIngestionConfig": {
+      "streamConfigMaps": [
+        {
+          "streamType": "kafka",
+          "stream.kafka.consumer.type": "lowlevel",
+          "stream.kafka.topic.name": "payments",
+          "stream.kafka.decoder.class.name": "org.apache.pinot.plugin.stream.kafka.KafkaJSONMessageDecoder",
+          "stream.kafka.consumer.factory.class.name": "org.apache.pinot.plugin.stream.kafka20.KafkaConsumerFactory",
+          "stream.kafka.zk.broker.url": "kafka-broker:9092",
+          "stream.kafka.broker.list": "kafka-broker:9092"
+        }
+      ]
+    },
+    "filterConfig": {
+      "filterFunction": "Groovy({'data.transactionType != null && data.bookingStatus != null'}, data)"
+    },
+    "transformConfig": {
+      "transformFunctions": [
+        {
+          "columnName": "eventId",
+          "transformFunction": "data.id"
+        },
+        {
+          "columnName": "eventType",
+          "transformFunction": "data.type"
+        },
+        {
+          "columnName": "eventSource",
+          "transformFunction": "data.source"
+        },
+        {
+          "columnName": "eventTime",
+          "transformFunction": "data.time"
+        },
+        {
+          "columnName": "transactionId",
+          "transformFunction": "data.data.transactionId"
+        },
+        {
+          "columnName": "paymentOrderId",
+          "transformFunction": "data.data.paymentOrderId"
+        },
+        {
+          "columnName": "journalEntryId",
+          "transformFunction": "data.data.journalEntryId"
+        },
+        {
+          "columnName": "amount",
+          "transformFunction": "toDouble(data.data.amount)"
+        },
+        {
+          "columnName": "currency",
+          "transformFunction": "data.data.currency"
+        },
+        {
+          "columnName": "transactionType",
+          "transformFunction": "data.data.transactionType"
+        },
+        {
+          "columnName": "bookingStatus",
+          "transformFunction": "data.data.bookingStatus"
+        },
+        {
+          "columnName": "buyerId",
+          "transformFunction": "data.data.buyer.id"
+        },
+        {
+          "columnName": "buyerEmail",
+          "transformFunction": "data.data.buyer.email"
+        },
+        {
+          "columnName": "buyerName",
+          "transformFunction": "data.data.buyer.name"
+        },
+        {
+          "columnName": "sellerId",
+          "transformFunction": "data.data.seller.id"
+        },
+        {
+          "columnName": "sellerEmail",
+          "transformFunction": "data.data.seller.email"
+        },
+        {
+          "columnName": "sellerName",
+          "transformFunction": "data.data.seller.name"
+        },
+        {
+          "columnName": "merchantId",
+          "transformFunction": "data.data.seller.merchantId"
+        },
+        {
+          "columnName": "metadata",
+          "transformFunction": "jsonFormat(data.data.metadata)"
+        },
+        {
+          "columnName": "bookedAt",
+          "transformFunction": "toTimestamp(data.data.bookedAt)"
+        }
+      ]
+    }
+  },
+  "tierConfigs": [
+    {
+      "name": "hotTier",
+      "segmentSelectorType": "time",
+      "segmentAge": "7d",
+      "storageType": "pinot_server"
+    },
+    {
+      "name": "coldTier",
+      "segmentSelectorType": "time", 
+      "segmentAge": "30d",
+      "storageType": "pinot_server"
+    }
+  ]
+}

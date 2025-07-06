@@ -1,0 +1,125 @@
+{
+  "schemaName": "payment_analytics",
+  "dimensionFieldSpecs": [
+    {
+      "name": "transactionId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "paymentOrderId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "journalEntryId",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "checkoutId",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "currency",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "transactionType",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "transactionStatus",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "bookingStatus",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "buyerId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "buyerEmail",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "buyerName",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "sellerId",
+      "dataType": "STRING",
+      "notNull": true
+    },
+    {
+      "name": "sellerEmail",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "sellerName",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "merchantId",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "walletMetadata",
+      "dataType": "JSON",
+      "notNull": false
+    },
+    {
+      "name": "bookingMetadata",
+      "dataType": "JSON",
+      "notNull": false
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "amount",
+      "dataType": "DOUBLE",
+      "notNull": true
+    },
+    {
+      "name": "processingTimeMs",
+      "dataType": "LONG",
+      "notNull": false
+    }
+  ],
+  "timeFieldSpec": {
+    "incomingGranularitySpec": {
+      "name": "transactionTime",
+      "dataType": "TIMESTAMP",
+      "timeType": "TIMESTAMP",
+      "timeFormat": "1:MILLISECONDS:EPOCH",
+      "timeUnitSize": 1
+    }
+  },
+  "dateTimeFieldSpecs": [
+    {
+      "name": "registeredAt",
+      "dataType": "TIMESTAMP",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    },
+    {
+      "name": "bookedAt",
+      "dataType": "TIMESTAMP",
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}
